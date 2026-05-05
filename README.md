@@ -255,7 +255,7 @@ TEST(TransactionTest, ExecuteFailsWithWrongAccounts) {
 ### 2.4. Настройка корневого CMakeLists.txt
 ```
 cmake_minimum_required(VERSION 3.10)
-project(lab05)
+project(lab06)
 
 option(BUILD_TESTS "Build tests" OFF)
 
@@ -325,7 +325,7 @@ jobs:
 ### 2.6. Настройка Coveralls.io
 
 1. Зарегистрировался на https://coveralls.io через GitHub
-2. Добавил репозиторий qNetayS/lab05
+2. Добавил репозиторий qNetayS/lab06
 3. Включил автоматическую отправку покрытия
 
 
