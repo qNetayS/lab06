@@ -4,21 +4,24 @@
 Для этого нужно добавить ветлвение в конфигурационные файлы для СL.
 
 ## 1. Настройка переменных
+```
 export GITHUB_USERNAME=qNetayS
 export GITHUB_EMAIL=qNetayS@github.com
 alias edit=nano
 alias gsed=sed
+```
 
 Результат: настроили окружение для работы в терминале 
 
 ## 2. Добавляем версионирование в CMakeLists.txt
+```
 gsed -i '/project(lab06)/a\ set(PRINT_VERSION_MAJOR 0)' CMakeLists.txt
 gsed -i '/project(lab06)/a\ set(PRINT_VERSION_MINOR 1)' CMakeLists.txt
 gsed -i '/project(lab06)/a\ set(PRINT_VERSION_PATCH 0)' CMakeLists.txt
 gsed -i '/project(lab06)/a\ set(PRINT_VERSION_TWEAK 0)' CMakeLists.txt
 gsed -i '/project(lab06)/a\ set(PRINT_VERSION "${PRINT_VERSION_MAJOR}.${PRINT_VERSION_MINOR}.${PRINT_VERSION_PATCH}.${PRINT_VERSION_TWEAK}")' CMakeLists.txt
 gsed -i '/project(lab06)/a\ set(PRINT_VERSION_STRING "v\\${PRINT_VERSION}")' CMakeLists.txt
-
+```
 ## 3. Создаем DESCRIPTION и ChangeLog.md
 ```
 touch DESCRIPTION && edit DESCRIPTION
