@@ -166,6 +166,7 @@ cpack -G "TGZ"
 cpack -G "DEB"
 cpack -G "RPM"
 cd ..
+```
 # HOMEWORK
 ## 1. Добавление solver в CPack конфигурацию
 ```
