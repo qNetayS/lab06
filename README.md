@@ -10,16 +10,6 @@ export GITHUB_EMAIL=qNetayS@github.com
 alias edit=nano
 alias gsed=sed
 ```
-## Homework (Задание)
-
-После того, как вы настроили взаимодействие с системой непрерывной интеграции, обеспечив автоматическую сборку и тестирование ваших изменений, стоит задуматься о создании пакетов для изменений, которые помечаются тэгами (см. вкладку releases).
-
-**Пакет должен содержать приложение solver из предыдущего задания.**
-
-Таким образом, каждый новый релиз будет состоять из следующих компонентов:
-- архивы с файлами исходного кода (.tar.gz, .zip)
-- пакеты с бинарным файлом solver (.deb, .rpm, .msi, .dmg)
-Результат: настроили окружение для работы в терминале 
 
 ## 2. Добавляем версионирование в CMakeLists.txt
 ```
@@ -176,11 +166,130 @@ cpack -G "TGZ"
 cpack -G "DEB"
 cpack -G "RPM"
 cd ..
+# HOMEWORK
+## 1. Добавление solver в CPack конфигурацию
 ```
-Конфигурирует проект через CMake
-Собирает проект
-Создаёт пакеты локально (проверка без CI
-## 9. Создаем artifacts (скриншот)
+cat >> CPackConfig.cmake <<'EOF'
+set(CPACK_PACKAGE_NAME "solver")
+set(CPACK_RPM_PACKAGE_NAME "solver")
+set(CPACK_DEBIAN_PACKAGE_NAME "solver")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Solver application with formatter")
+set(CPACK_SOURCE_GENERATOR "TGZ;ZIP")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "solver-\${CPACK_PACKAGE_VERSION}-Source")
+EOF
+```
+Обновление CPackConfig.cmake для создания пакетов solver
+## 2.Cоздание библиотек formatter и formatter_ex
+```
+mkdir -p formatter_lib
+cat > formatter_lib/formatter.cpp <<'EOF'
+#include "formatter.h"
+std::string formatter(const std::string& text) { return text; }
+EOF
+
+cat > formatter_lib/formatter.h <<'EOF'
+#pragma once
+#include <string>
+std::string formatter(const std::string& text);
+EOF
+
+cat > formatter_lib/CMakeLists.txt <<'EOF'
+cmake_minimum_required(VERSION 3.5)
+project(formatter)
+set(CMAKE_CXX_STANDARD 11)
+add_library(formatter STATIC formatter.cpp)
+EOF
+```
+Результат: Создание библиотек formatter и formatter_ex
+## 3.Создание библиотеки solver_lib и приложения solver
+```
+mkdir -p solver_lib
+cat > solver_lib/solver.cpp <<'EOF'
+#include "solver.h"
+double solver(double a, double b) { return a + b; }
+EOF
+
+cat > solver_lib/solver.h <<'EOF'
+#pragma once
+double solver(double a, double b);
+EOF
+
+cat > solver_lib/CMakeLists.txt <<'EOF'
+cmake_minimum_required(VERSION 3.5)
+project(solver_lib)
+set(CMAKE_CXX_STANDARD 11)
+add_library(solver_lib STATIC solver.cpp)
+EOF
+
+mkdir -p solver_application
+cat > solver_application/equation.cpp <<'EOF'
+#include <iostream>
+#include "formatter_ex.h"
+#include "solver.h"
+
+int main() {
+    std::cout << formatter_ex("Solving equation: x + 5 = 10") << std::endl;
+    double result = solver(5, 5);
+    std::cout << "Result: x = " << result << std::endl;
+    return 0;
+}
+EOF
+
+cat > solver_application/CMakeLists.txt <<'EOF'
+cmake_minimum_required(VERSION 3.5)
+project(solver)
+set(CMAKE_CXX_STANDARD 11)
+add_executable(solver equation.cpp)
+include_directories(${CMAKE_SOURCE_DIR}/formatter_lib)
+include_directories(${CMAKE_SOURCE_DIR}/formatter_ex_lib)
+include_directories(${CMAKE_SOURCE_DIR}/solver_lib)
+target_link_libraries(solver formatter_ex solver_lib formatter)
+EOF
+```
+## 4.Обновление корневого CMakeLists.txt
+```
+cat >> CMakeLists.txt <<'EOF'
+add_subdirectory(formatter_lib)
+add_subdirectory(formatter_ex_lib)
+add_subdirectory(solver_lib)
+add_subdirectory(solver_application)
+EOF
+```
+Результат: Подключение всех поддиректорий к сборке
+
+
+## 5.Локальная сборка всех пакетов
+```
+rm -rf _build
+cmake -H. -B_build -DCPACK_GENERATOR="TGZ;DEB;RPM"
+cmake --build _build
+cmake --build _build --target package
+
+ls -la _build/*.deb _build/*.rpm _build/*.tar.gz 2>/dev/null
+```
+Результат: Созданы пакеты DEB, RPM, TGZ для solver
+## 6.Итоговая структура
+```
+lab06/
+├── artifacts/
+│   └── banking-0.1.0.0-Linux.tar.gz
+├── .github/workflows/
+│   └── linux.yml
+├── formatter_lib/
+├── formatter_ex_lib/
+├── solver_lib/
+├── solver_application/
+├── banking/
+├── tests/
+├── CMakeLists.txt
+├── CPackConfig.cmake
+├── DESCRIPTION
+├── ChangeLog.md
+├── LICENSE
+└── README.md
+```
+
+## 7. Создаем artifacts (скриншот)
 ```
 mkdir artifacts
 sleep 20s && gnome-screenshot --file artifacts/screenshot.png
